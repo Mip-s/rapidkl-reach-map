@@ -44,6 +44,11 @@ function shortestTimes(originKey, opt) {
       adj.get(b).push([a, walk + wait(a)]);
     }
   }
+  const prev = new Map();
+  const kinds = new Map(); // "u>v" -> ride | change | walk
+  for (const e of net.edges) kinds.set(`${e.a}>${e.b}`, "ride");
+  for (const { a, b } of net.interchanges) { kinds.set(`${a}>${b}`, "change"); kinds.set(`${b}>${a}`, "change"); }
+  if (opt.near) for (const { a, b } of net.candidates) { kinds.set(`${a}>${b}`, "walk"); kinds.set(`${b}>${a}`, "walk"); }
   const todo = new Set();
   for (const s of stations.get(originKey).stops) {
     dist.set(s.id, opt.firstWait ? wait(s.id) : 0);
@@ -55,11 +60,11 @@ function shortestTimes(originKey, opt) {
     for (const id of todo) if (u === null || dist.get(id) < dist.get(u)) u = id;
     todo.delete(u);
     if (dist.get(u) === Infinity) break;
-    for (const [v, w] of adj.get(u)) if (dist.get(u) + w < dist.get(v)) dist.set(v, dist.get(u) + w);
+    for (const [v, w] of adj.get(u)) if (dist.get(u) + w < dist.get(v)) { dist.set(v, dist.get(u) + w); prev.set(v, u); }
   }
   const out = new Map();
   for (const st of stations.values()) out.set(st.key, Math.min(...st.stops.map((s) => dist.get(s.id))));
-  return out;
+  return { times: out, dist, prev, kinds };
 }
 
 const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -98,77 +103,82 @@ for (const [code, line] of Object.entries(net.lines)) {
     const A = onLine[k], B = onLine[k + 1];
     const pts = [[A.s.lat, A.s.lon], ...line.shape.slice(A.i + 1, B.i), [B.s.lat, B.s.lon]];
     const poly = L.polyline(pts, { color: line.color, weight: 5, opacity: 0.85 }).addTo(map);
-    segments.push({ poly, a: find(A.s.id), b: find(B.s.id), color: line.color });
+    segments.push({ poly, pts, ids: [A.s.id, B.s.id], a: find(A.s.id), b: find(B.s.id), color: line.color });
   }
 }
 const markers = new Map();
 for (const st of stations.values()) {
   const m = L.circleMarker([st.lat, st.lon], { radius: 6, weight: 2, color: "#fff", fillOpacity: 1 }).addTo(map);
-  m.on("click", () => setOrigin(st.key));
+  m.bindPopup(() => {
+    const box = document.createElement("div");
+    box.innerHTML = `<b>${st.name}</b><br>`;
+    for (const [label, combo] of [["From here", originCombo], ["To here", destCombo]]) {
+      const btn = document.createElement("button");
+      btn.textContent = label;
+      btn.style.margin = "6px 6px 0 0";
+      btn.addEventListener("click", () => { combo.pick(st.key); map.closePopup(); });
+      box.appendChild(btn);
+    }
+    return box;
+  });
   markers.set(st.key, m);
 }
 
 // Controls
 const sorted = [...stations.values()].sort((a, b) => a.name.localeCompare(b.name));
 const lineNames = (s) => s.lines.map((c) => net.lines[c].name.replace(/ Line$/, "")).join(", ");
-const search = $("originSearch");
-const box = $("suggest");
-let matches = [];
-let active = -1;
+function makeCombo(input, hidden, list, onPick) {
+  let matches = [];
+  let active = -1;
+  const show = () => { input.value = hidden.value ? stations.get(hidden.value).name : ""; };
+  const close = () => { list.hidden = true; input.setAttribute("aria-expanded", "false"); active = -1; };
+  const render = () => {
+    const q = input.value.trim().toLowerCase();
+    matches = sorted.filter((s) => !q || s.name.toLowerCase().includes(q) || s.stops.some((p) => p.id.toLowerCase() === q) || lineNames(s).toLowerCase().includes(q));
+    matches.sort((x, y) => !x.name.toLowerCase().startsWith(q) - !y.name.toLowerCase().startsWith(q) || x.name.localeCompare(y.name));
+    active = matches.length ? 0 : -1;
+    list.innerHTML = matches.length
+      ? matches.map((s, i) => `<li role="option" data-k="${s.key}" class="${i === active ? "on" : ""}">${s.lines.map((c) => `<span class="chip" style="background:${net.lines[c].color}"></span>`).join("")}${s.name}<small>${lineNames(s)}</small></li>`).join("")
+      : `<li>No station found</li>`;
+    list.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+  };
+  const pick = (key) => { hidden.value = key; show(); close(); onPick(key); };
+  input.addEventListener("focus", () => { input.select(); render(); });
+  input.addEventListener("click", () => { if (list.hidden) { input.select(); render(); } });
+  input.addEventListener("input", () => {
+    if (!input.value && input.dataset.optional) { hidden.value = ""; onPick(""); }
+    render();
+  });
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      if (list.hidden) render();
+      if (!matches.length) return;
+      active = (active + (e.key === "ArrowDown" ? 1 : -1) + matches.length) % matches.length;
+      [...list.children].forEach((li, i) => li.classList.toggle("on", i === active));
+      list.children[active].scrollIntoView({ block: "nearest" });
+    } else if (e.key === "Enter" && active >= 0) {
+      e.preventDefault();
+      pick(matches[active].key);
+      input.blur();
+    } else if (e.key === "Escape") {
+      e.preventDefault(); // a search input would otherwise clear itself
+      show();
+      close();
+    }
+  });
+  list.addEventListener("mousedown", (e) => {
+    const li = e.target.closest("li[data-k]");
+    if (li) { e.preventDefault(); pick(li.dataset.k); input.blur(); }
+  });
+  input.addEventListener("blur", () => { show(); close(); });
+  return { pick, set: (key) => { hidden.value = key; show(); } };
+}
 
-function setOrigin(key) {
-  $("origin").value = key;
-  search.value = stations.get(key).name;
-  closeSuggest();
-  update();
-}
-function closeSuggest() {
-  box.hidden = true;
-  search.setAttribute("aria-expanded", "false");
-  active = -1;
-}
-function renderSuggest() {
-  const q = search.value.trim().toLowerCase();
-  matches = sorted.filter((s) => !q || s.name.toLowerCase().includes(q) || s.stops.some((p) => p.id.toLowerCase() === q) || lineNames(s).toLowerCase().includes(q));
-  matches.sort((a, b) => !a.name.toLowerCase().startsWith(q) - !b.name.toLowerCase().startsWith(q) || a.name.localeCompare(b.name));
-  active = matches.length ? 0 : -1;
-  box.innerHTML = matches.length
-    ? matches.map((s, i) => `<li role="option" data-k="${s.key}" class="${i === active ? "on" : ""}">${s.lines.map((c) => `<span class="chip" style="background:${net.lines[c].color}"></span>`).join("")}${s.name}<small>${lineNames(s)}</small></li>`).join("")
-    : `<li>No station found</li>`;
-  box.hidden = false;
-  search.setAttribute("aria-expanded", "true");
-}
-search.addEventListener("focus", () => { search.select(); renderSuggest(); });
-search.addEventListener("click", () => { if (box.hidden) { search.select(); renderSuggest(); } });
-search.addEventListener("input", renderSuggest);
-search.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-    e.preventDefault();
-    if (box.hidden) renderSuggest();
-    if (!matches.length) return;
-    active = (active + (e.key === "ArrowDown" ? 1 : -1) + matches.length) % matches.length;
-    [...box.children].forEach((li, i) => li.classList.toggle("on", i === active));
-    box.children[active].scrollIntoView({ block: "nearest" });
-  } else if (e.key === "Enter" && active >= 0) {
-    e.preventDefault();
-    setOrigin(matches[active].key);
-    search.blur();
-  } else if (e.key === "Escape") {
-    e.preventDefault(); // a search input would otherwise clear itself
-    search.value = stations.get($("origin").value).name;
-    closeSuggest();
-  }
-});
-box.addEventListener("mousedown", (e) => {
-  const li = e.target.closest("li[data-k]");
-  if (li) { e.preventDefault(); setOrigin(li.dataset.k); search.blur(); }
-});
-search.addEventListener("blur", () => {
-  if ($("origin").value) search.value = stations.get($("origin").value).name;
-  closeSuggest();
-});
-$("origin").value = [...stations.values()].find((s) => s.name === "KL Sentral")?.key ?? sorted[0].key;
-search.value = stations.get($("origin").value).name;
+const originCombo = makeCombo($("originSearch"), $("origin"), $("suggest"), () => update());
+const destCombo = makeCombo($("destSearch"), $("dest"), $("suggestDest"), (key) => { update(); if (key) fitRoute(); });
+originCombo.set([...stations.values()].find((s) => s.name === "KL Sentral")?.key ?? sorted[0].key);
 for (const id of ["limit", "transfer", "wait", "near", "firstwait", "buffer", "bufferMin", "bufferPct"]) $(id).addEventListener("input", update);
 for (const b of document.querySelectorAll(".presets button")) b.addEventListener("click", () => { $("limit").value = b.dataset.min; update(); });
 
@@ -183,16 +193,68 @@ function dur(totalMin) {
 }
 const fmt = (sec) => dur(sec / 60);
 
+const routeLayer = L.layerGroup().addTo(map);
+let routeBounds = null;
+
+function showRoute(sp, origin, destKey, { fixed, pct }) {
+  routeLayer.clearLayers();
+  routeBounds = null;
+  const out = $("route");
+  if (!destKey || destKey === origin) { out.hidden = true; out.innerHTML = ""; return; }
+  const dest = stations.get(destKey);
+  let end = null;
+  for (const s of dest.stops) if (end === null || sp.dist.get(s.id) < sp.dist.get(end)) end = s.id;
+  if (!Number.isFinite(sp.dist.get(end))) { out.hidden = false; out.textContent = `No rail route to ${dest.name}.`; return; }
+  const path = [end];
+  while (sp.prev.has(path[0])) path.unshift(sp.prev.get(path[0]));
+  const ride = sp.dist.get(end);
+  const total = ride + fixed + ride * pct;
+
+  // Group the hops into steps: rides on one line, then a change or a walk.
+  const steps = [];
+  const latlngs = [];
+  for (let k = 0; k + 1 < path.length; k++) {
+    const u = path[k], v = path[k + 1];
+    const kind = sp.kinds.get(`${u}>${v}`);
+    const su = stopById.get(u), sv = stopById.get(v);
+    let pts = [[su.lat, su.lon], [sv.lat, sv.lon]];
+    if (kind === "ride") {
+      const seg = segments.find((g) => (g.ids[0] === u && g.ids[1] === v) || (g.ids[0] === v && g.ids[1] === u));
+      if (seg) pts = seg.ids[0] === u ? seg.pts : [...seg.pts].reverse();
+    }
+    latlngs.push(...pts);
+    const color = net.lines[sv.line].color;
+    routeLayer.addLayer(L.polyline(pts, { color: "#000", weight: 10, opacity: 0.85, lineCap: "round" }));
+    routeLayer.addLayer(L.polyline(pts, { color: kind === "ride" ? color : "#fff", weight: 6, opacity: 1, dashArray: kind === "ride" ? null : "2 9", lineCap: "round" }));
+    const last = steps[steps.length - 1];
+    if (kind === "ride" && last && last.type === "ride" && last.line === sv.line) { last.to = sv; last.n++; }
+    else if (kind === "ride") steps.push({ type: "ride", line: sv.line, from: su, to: sv, n: 1 });
+    else steps.push({ type: kind, from: su, to: sv });
+  }
+  routeBounds = L.latLngBounds(latlngs);
+  const nm = (s) => title(s.name);
+  const html = steps.map((s) => s.type === "ride"
+    ? `<li><span class="chip" style="background:${net.lines[s.line].color}"></span><span>${net.lines[s.line].name}: ${nm(s.from)} to ${nm(s.to)} (${s.n} ${s.n === 1 ? "stop" : "stops"})</span></li>`
+    : s.type === "change"
+      ? `<li class="xfer">Change trains at ${nm(s.from)}</li>`
+      : `<li class="xfer">Walk from ${nm(s.from)} to ${nm(s.to)}</li>`).join("");
+  out.hidden = false;
+  out.innerHTML = `<div class="rtotal">${stations.get(origin).name} to ${dest.name}: <b>${fmt(total)}</b></div>
+    <div class="rsub">${fmt(ride)} on the network + ${fmt(total - ride)} allowance</div><ol>${html}</ol>`;
+}
+function fitRoute() { if (routeBounds) map.fitBounds(routeBounds, { padding: [40, 40], maxZoom: 14 }); }
+
 function update() {
   const limit = +$("limit").value;
   $("limitText").textContent = dur(limit);
   const origin = $("origin").value;
-  const times = shortestTimes(origin, {
+  const sp = shortestTimes(origin, {
     transfer: Math.max(0, +$("transfer").value || 0),
     wait: $("wait").checked,
     near: $("near").checked,
     firstWait: $("firstwait").checked,
   });
+  const times = sp.times;
   // Door-to-door allowance: fixed minutes (walk in, gates, walk out) plus a share of the ride time
   // (waits and delays add up on long trips). Not charged for the start station itself.
   const on = $("buffer").checked;
@@ -208,11 +270,12 @@ function update() {
     const m = markers.get(st.key);
     const inside = min <= limit;
     const isOrigin = st.key === origin;
+    const isDest = st.key === $("dest").value;
     m.setStyle({
       fillColor: inside ? bandColor(min) : css("--out"),
       fillOpacity: inside ? 1 : 0.45,
-      radius: isOrigin ? 10 : 6,
-      color: isOrigin ? "#000" : "#fff",
+      radius: isOrigin || isDest ? 10 : 6,
+      color: isOrigin ? "#000" : isDest ? "#1a73e8" : "#fff",
     });
     m.bindTooltip(`${st.name}: ${isOrigin ? "start" : Number.isFinite(min) ? fmt(sec) : "unreachable"}`);
     if (isOrigin) m.bringToFront();
@@ -222,6 +285,7 @@ function update() {
     const reach = secOf.get(sg.a) / 60 <= limit && secOf.get(sg.b) / 60 <= limit;
     sg.poly.setStyle(reach ? { color: sg.color, weight: 5, opacity: 0.9 } : { color: sg.color, weight: 3, opacity: 0.12 });
   }
+  showRoute(sp, origin, $("dest").value, { fixed, pct });
   rows.sort((a, b) => a.sec - b.sec);
   const within = rows.filter((r) => r.inside && r.st.key !== origin).length;
   $("summary").textContent = `${within} stations within ${$("limitText").textContent}`;

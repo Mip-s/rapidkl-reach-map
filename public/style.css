@@ -43,8 +43,15 @@ main { flex:1; position:relative; min-width:0; }
 }
 .combo { position:relative; }
 .combo input[type=search] { width:100%; padding:7px; font:inherit; color:var(--fg); background:var(--bg); border:1px solid var(--line); border-radius:6px; }
-#suggest { position:absolute; z-index:2000; left:0; right:0; top:100%; margin:2px 0 0; padding:0; list-style:none; max-height:260px; overflow-y:auto; background:var(--bg); border:1px solid var(--line); border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,.15); }
-#suggest li { padding:6px 8px; display:flex; gap:6px; align-items:center; cursor:pointer; }
-#suggest li.on, #suggest li:hover { background:var(--panel); }
-#suggest small { margin-left:auto; color:var(--muted); }
+#suggest, #suggestDest { position:absolute; z-index:2000; left:0; right:0; top:100%; margin:2px 0 0; padding:0; list-style:none; max-height:260px; overflow-y:auto; background:var(--bg); border:1px solid var(--line); border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,.15); }
+#suggest li, #suggestDest li { padding:6px 8px; display:flex; gap:6px; align-items:center; cursor:pointer; }
+#suggest li.on, #suggest li:hover, #suggestDest li.on, #suggestDest li:hover { background:var(--panel); }
+#suggest small, #suggestDest small { margin-left:auto; color:var(--muted); }
 .tiles-minimal { filter:grayscale(1) contrast(.55) brightness(1.25) opacity(.55); }
+.opt { font-weight:400; color:var(--muted); }
+#route { margin-top:10px; padding:10px; background:var(--bg); border:1px solid var(--line); border-radius:8px; }
+#route .rtotal { font-size:15px; }
+#route .rsub { color:var(--muted); font-size:12px; margin-bottom:6px; }
+#route ol { list-style:none; margin:0; padding:0; }
+#route li { display:flex; gap:8px; align-items:flex-start; padding:3px 0; }
+#route li.xfer { color:var(--muted); padding-left:18px; font-size:13px; }

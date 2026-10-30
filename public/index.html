@@ -23,6 +23,14 @@
     <ul id="suggest" role="listbox" hidden></ul>
   </div>
 
+  <label for="destSearch">To station <span class="opt">(optional)</span></label>
+  <div class="combo">
+    <input id="destSearch" type="search" data-optional="1" placeholder="Search a destination" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="suggestDest">
+    <input id="dest" type="hidden">
+    <ul id="suggestDest" role="listbox" hidden></ul>
+  </div>
+  <div id="route" hidden></div>
+
   <label for="limit">Reach limit: <b id="limitText">1 hour</b></label>
   <input id="limit" type="range" min="15" max="180" step="5" value="60">
   <div class="presets"><button data-min="30">30 min</button><button data-min="60">1 hour</button><button data-min="120">2 hours</button></div>
