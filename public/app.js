@@ -90,7 +90,7 @@ $("origin").innerHTML = sorted
   .map((s) => `<option value="${s.key}">${s.name} (${s.lines.map((c) => net.lines[c].name.replace(/ Line$/, "")).join(", ")})</option>`)
   .join("");
 $("origin").value = [...stations.values()].find((s) => s.name === "KL Sentral")?.key ?? sorted[0].key;
-for (const id of ["origin", "limit", "transfer", "wait", "near", "firstwait", "buffer", "bufferMin"]) $(id).addEventListener("input", update);
+for (const id of ["origin", "limit", "transfer", "wait", "near", "firstwait", "buffer", "bufferMin", "bufferPct"]) $(id).addEventListener("input", update);
 for (const b of document.querySelectorAll(".presets button")) b.addEventListener("click", () => { $("limit").value = b.dataset.min; update(); });
 
 function fmt(sec) {
@@ -108,11 +108,15 @@ function update() {
     near: $("near").checked,
     firstWait: $("firstwait").checked,
   });
-  // Door-to-door allowance (walk in, ticket gates, walk out); not charged for the start station itself.
-  const buffer = $("buffer").checked ? Math.max(0, +$("bufferMin").value || 0) * 60 : 0;
+  // Door-to-door allowance: fixed minutes (walk in, gates, walk out) plus a share of the ride time
+  // (waits and delays add up on long trips). Not charged for the start station itself.
+  const on = $("buffer").checked;
+  const fixed = on ? Math.max(0, +$("bufferMin").value || 0) * 60 : 0;
+  const pct = on ? Math.max(0, +$("bufferPct").value || 0) / 100 : 0;
   const rows = [];
   for (const st of stations.values()) {
-    const sec = times.get(st.key) + (st.key === origin ? 0 : buffer);
+    const ride = times.get(st.key);
+    const sec = st.key === origin ? 0 : ride + fixed + ride * pct;
     const min = sec / 60;
     const m = markers.get(st.key);
     const inside = min <= limit;
