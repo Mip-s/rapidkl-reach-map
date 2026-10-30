@@ -55,3 +55,13 @@ main { flex:1; position:relative; min-width:0; }
 #route ol { list-style:none; margin:0; padding:0; }
 #route li { display:flex; gap:8px; align-items:flex-start; padding:3px 0; }
 #route li.xfer { color:var(--muted); padding-left:18px; font-size:13px; }
+.presetRow { display:flex; gap:6px; margin:8px 0 4px; }
+.presetRow button { flex:1; padding:5px 4px; }
+.presetRow button.on { background:var(--fg); color:var(--bg); }
+.guide { margin:6px 0; font-size:13px; }
+.guide summary { cursor:pointer; font-weight:600; }
+.guide p, .guide ul { margin:6px 0; }
+.guide ul { padding-left:18px; }
+.guide table { width:100%; border-collapse:collapse; font-size:12px; margin:6px 0; }
+.guide th, .guide td { text-align:left; padding:3px 4px; border-bottom:1px solid var(--line); vertical-align:top; }
+.guide .fine { color:var(--muted); font-size:12px; }

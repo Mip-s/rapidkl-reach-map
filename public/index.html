@@ -45,6 +45,28 @@
       <input id="bufferMin" type="number" min="0" max="30" step="1" value="20"></label>
     <label class="row">&nbsp;&nbsp;plus % of ride time
       <input id="bufferPct" type="number" min="0" max="50" step="1" value="20"></label>
+    <div class="presetRow" role="group" aria-label="Allowance presets">
+      <button type="button" data-fix="15" data-pct="10">Tight</button>
+      <button type="button" data-fix="20" data-pct="20">Balanced</button>
+      <button type="button" data-fix="25" data-pct="20">Safe</button>
+    </div>
+    <details class="guide">
+      <summary>How to choose the allowance</summary>
+      <p>The allowance covers what a timetable leaves out: walking in, ticket gates, waiting on the platform, and delays. It is a fixed number of minutes plus a share of the ride, so long trips get more.</p>
+      <table>
+        <tr><th></th><th>Add on a 30 min ride</th><th>Matches Google Maps</th></tr>
+        <tr><td><b>Tight</b> 15 min + 10%</td><td>+18 min</td><td>about 7 in 10 trips</td></tr>
+        <tr><td><b>Balanced</b> 20 min + 20%</td><td>+26 min</td><td>about 9 in 10 trips</td></tr>
+        <tr><td><b>Safe</b> 25 min + 20%</td><td>+31 min</td><td>nearly every trip</td></tr>
+      </table>
+      <ul>
+        <li><b>Tight</b>: you know the lines, you are travelling off-peak, and a late arrival costs little.</li>
+        <li><b>Balanced</b> (default): most trips, including a first visit to a station.</li>
+        <li><b>Safe</b>: you must arrive on time (a flight, an exam, an interview), or you travel at rush hour with several line changes.</li>
+      </ul>
+      <p>Interchange walk: 5 min is typical, use 8 to 10 for large interchanges such as KL Sentral or Masjid Jamek, or if you move slowly. Turn off "wait at interchanges" only if you are happy to count on a train arriving as you reach the platform.</p>
+      <p class="fine">Based on 72 Google Maps rail routes, weekday morning, "leave now". The app errs long on purpose. Nothing here is live train data.</p>
+    </details>
     <label class="row chk"><input id="firstwait" type="checkbox"> Add wait at the first station</label>
   </fieldset>
 

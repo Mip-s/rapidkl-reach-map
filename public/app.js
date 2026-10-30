@@ -180,6 +180,20 @@ const originCombo = makeCombo($("originSearch"), $("origin"), $("suggest"), () =
 const destCombo = makeCombo($("destSearch"), $("dest"), $("suggestDest"), (key) => { update(); if (key) fitRoute(); });
 originCombo.set([...stations.values()].find((s) => s.name === "KL Sentral")?.key ?? sorted[0].key);
 for (const id of ["limit", "transfer", "wait", "near", "firstwait", "buffer", "bufferMin", "bufferPct"]) $(id).addEventListener("input", update);
+for (const b of document.querySelectorAll(".presetRow button")) {
+  b.addEventListener("click", () => {
+    $("buffer").checked = true;
+    $("bufferMin").value = b.dataset.fix;
+    $("bufferPct").value = b.dataset.pct;
+    update();
+  });
+}
+function markPreset() {
+  for (const b of document.querySelectorAll(".presetRow button")) {
+    const on = $("buffer").checked && $("bufferMin").value === b.dataset.fix && $("bufferPct").value === b.dataset.pct;
+    b.classList.toggle("on", on);
+  }
+}
 for (const b of document.querySelectorAll(".presets button")) b.addEventListener("click", () => { $("limit").value = b.dataset.min; update(); });
 
 // "2 hours 5 minutes", "1 hour", "45 minutes"
@@ -245,6 +259,7 @@ function showRoute(sp, origin, destKey, { fixed, pct }) {
 function fitRoute() { if (routeBounds) map.fitBounds(routeBounds, { padding: [40, 40], maxZoom: 14 }); }
 
 function update() {
+  markPreset();
   const limit = +$("limit").value;
   $("limitText").textContent = dur(limit);
   const origin = $("origin").value;
