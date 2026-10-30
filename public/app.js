@@ -171,14 +171,20 @@ search.value = stations.get($("origin").value).name;
 for (const id of ["limit", "transfer", "wait", "near", "firstwait", "buffer", "bufferMin", "bufferPct"]) $(id).addEventListener("input", update);
 for (const b of document.querySelectorAll(".presets button")) b.addEventListener("click", () => { $("limit").value = b.dataset.min; update(); });
 
-function fmt(sec) {
-  const m = Math.round(sec / 60);
-  return m >= 60 ? `${Math.floor(m / 60)} h ${String(m % 60).padStart(2, "0")} min` : `${m} min`;
+// "2 hours 5 minutes", "1 hour", "45 minutes"
+function dur(totalMin) {
+  const m = Math.round(totalMin);
+  const h = Math.floor(m / 60), r = m % 60;
+  const parts = [];
+  if (h) parts.push(`${h} ${h === 1 ? "hour" : "hours"}`);
+  if (r || !h) parts.push(`${r} ${r === 1 ? "minute" : "minutes"}`);
+  return parts.join(" ");
 }
+const fmt = (sec) => dur(sec / 60);
 
 function update() {
   const limit = +$("limit").value;
-  $("limitText").textContent = limit >= 60 && limit % 60 === 0 ? `${limit / 60} h` : `${limit} min`;
+  $("limitText").textContent = dur(limit);
   const origin = $("origin").value;
   const times = shortestTimes(origin, {
     transfer: Math.max(0, +$("transfer").value || 0),
