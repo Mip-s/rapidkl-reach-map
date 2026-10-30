@@ -15,5 +15,7 @@ python3 scripts/build_network.py
 ```
 Writes `public/data/network.json`. Scope: LRT, MRT, Monorail (BRT is excluded).
 
-## Hosting (Cloudflare Pages)
-No build step. Build command: empty. Output directory: `public`.
+## Hosting (Cloudflare)
+Static files only, no build step. `wrangler.jsonc` serves the `public` folder as Workers static assets.
+- Workers (current Cloudflare flow): connect this repo, leave the build command empty, deploy command `npx wrangler deploy`.
+- Pages (older flow): build command empty, output directory `public`.
