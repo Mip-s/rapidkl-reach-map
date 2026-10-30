@@ -1,0 +1,101 @@
+n,from,from_ids,to,to_ids,from_key,to_key
+1,Pasar Seni,KG16/KJ14,Bandaraya,AG6/SP6,KJ14,SP6
+2,Pasar Klang,SA18,Sentul Barat,PY16,SA18,PY16
+3,Kampung Selamat,PY03,Batu 11 Cheras,KG30,PY03,KG30
+4,Conlay,PY22,Serdang Raya Selatan,PY32,PY22,PY32
+5,Sri Damansara Sentral,PY07,Taman Selatan,SA21,PY07,SA21
+6,Taman Perindustrian Puchong,SP26,Surian,KG07,SP26,KG07
+7,Seksyen 7,SA15,Bandar Utama 11,SA3,SA15,SA3
+8,Sri Damansara Timur,PY08,Salak Selatan,SP13,PY08,SP13
+9,Sri Damansara Timur,PY08,IOI Puchong Jaya,SP24,PY08,SP24
+10,Kepong Baru,PY10,Sultan Ismail,AG5/SP5,PY10,SP5
+11,Bukit Jalil,SP17,USJ 7,KJ31,SP17,KJ31
+12,Taman Naga Emas,PY28,Bandar Tun Hussein Onn,KG29,PY28,KG29
+13,Bukit Bintang,KG18A/MR6,Chan Sow Lin,AG11/PY24/SP11,MR6,SP11
+14,Taman Selatan,SA21,Pandan Indah,AG15,SA21,AG15
+15,Gombak,KJ1,Jinjang,PY11,KJ1,PY11
+16,PWTC,AG4/SP4,Kinrara BK5,SP22,SP4,SP22
+17,Putra Heights,KJ37/SP31,Sentul Timur,AG1/SP1,SP31,SP1
+18,Sungai Buloh,PY04,Kampung Selamat,PY03,PY04,PY03
+19,Bandar Tasik Selatan,SP15,Taman Midah,KG24,SP15,KG24
+20,Salak Selatan,SP13,Hang Tuah,AG9/MR4/SP9,SP13,SP9
+21,Taman Connaught,KG26,Wangsa Maju,KJ3,KG26,KJ3
+22,Putra Heights,KJ37/SP31,Metro Prima,PY09,SP31,PY09
+23,Hospital Kuala Lumpur,PY18,Taman Suntex,KG27,PY18,KG27
+24,Klang Jaya,SA23,Abdullah Hukum,KJ17,SA23,KJ17
+25,Dato' Menteri,SA12,Puchong Perdana,SP28,SA12,SP28
+26,Sri Petaling,SP18,Maharajalela,MR3,SP18,MR3
+27,Persiaran KLCC,PY21,Kwasa Sentral,KG05,PY21,KG05
+28,Bandaraya,AG6/SP6,Jalan Meru,SA19,SP6,SA19
+29,Maharajalela,MR3,Kerjaya,SA9,MR3,SA9
+30,Taman Melati,KJ2,Pandan Jaya,AG14,KJ2,AG14
+31,Kwasa Sentral,KG05,Taman Naga Emas,PY28,KG05,PY28
+32,Klang Jaya,SA23,Batu 11 Cheras,KG30,SA23,KG30
+33,Sungai Buloh,PY04,Taman Connaught,KG26,PY04,KG26
+34,Bandaraya,AG6/SP6,Dang Wangi,KJ12,SP6,KJ12
+35,Seri Andalas,SA22,Bandar Utama 11,SA3,SA22,SA3
+36,Cempaka,AG16,Sri Raya,KG28,AG16,KG28
+37,Sentul Timur,AG1/SP1,Kepong Baru,PY10,SP1,PY10
+38,Sentul Timur,AG1/SP1,16 Sierra,PY38,SP1,PY38
+39,IOI Puchong Jaya,SP24,Sentul Timur,AG1/SP1,SP24,SP1
+40,Ara Damansara,KJ26,UITM Shah Alam,SA14,KJ26,SA14
+41,Stadium Shah Alam,SA10,Taman Jaya,KJ20,SA10,KJ20
+42,Bandar Puteri,SP27,Cyberjaya Utara,PY39,SP27,PY39
+43,Miharja,AG12,Taman Selatan,SA21,AG12,SA21
+44,Pasar Seni,KG16/KJ14,Kinrara BK5,SP22,KJ14,SP22
+45,Dang Wangi,KJ12,Pusat Bandar Damansara,KG13,KJ12,KG13
+46,Hang Tuah,AG9/MR4/SP9,Salak Selatan,SP13,SP9,SP13
+47,Cheras,SP12,Bandar Tasik Selatan,SP15,SP12,SP15
+48,Tun Razak Exchange,KG20/PY23,SS 18,KJ30,PY23,KJ30
+49,UITM Shah Alam,SA14,Sri Raya,KG28,SA14,KG28
+50,Semantan,KG14,Raja Uda,PY19,KG14,PY19
+51,Dato' Keramat,KJ7,Miharja,AG12,KJ7,AG12
+52,Chow Kit,MR10,Ampang Park,KJ9/PY20,MR10,PY20
+53,Bukit Bintang,KG18A/MR6,Pandan Indah,AG15,MR6,AG15
+54,Cheras,SP12,Subang,SA6,SP12,SA6
+55,Kajang,KG35,UITM Shah Alam,SA14,KG35,SA14
+56,Kinrara BK5,SP22,Chow Kit,MR10,SP22,MR10
+57,Universiti,KJ19,Bukit Jalil,SP17,KJ19,SP17
+58,Subang Alam,KJ36,Damansara Idaman,SA5,KJ36,SA5
+59,Cyberjaya Utara,PY39,Bandar Baru Klang,SA17,PY39,SA17
+60,Sungai Besi,PY29/SP16,Kwasa Sentral,KG05,SP16,KG05
+61,Maharajalela,MR3,Taman Selatan,SA21,MR3,SA21
+62,Hang Tuah,AG9/MR4/SP9,Taman Perindustrian Puchong,SP26,SP9,SP26
+63,Bukit Jalil,SP17,Bukit Dukung,KG31,SP17,KG31
+64,Plaza Rakyat,AG8/SP8,Klang Jaya,SA23,SP8,SA23
+65,Kampung Batu,PY13,KLCC,KJ10,PY13,KJ10
+66,Chan Sow Lin,AG11/PY24/SP11,Johan Setia,SA26,SP11,SA26
+67,Sungai Buloh,PY04,Jinjang,PY11,PY04,PY11
+68,Chan Sow Lin,AG11/PY24/SP11,Pasar Klang,SA18,SP11,SA18
+69,Bukit Dukung,KG31,Subang Alam,KJ36,KG31,KJ36
+70,Cyberjaya Utara,PY39,Sultan Ismail,AG5/SP5,PY39,SP5
+71,Damansara Idaman,SA5,Kampung Batu,PY13,SA5,PY13
+72,Bandar Utama,KG09/SA1,Taman Equine,PY36,SA1,PY36
+73,Bukit Bintang,KG18A/MR6,Conlay,PY22,MR6,PY22
+74,Kuchai,PY27,Bandar Bukit Tinggi,SA24,PY27,SA24
+75,Wangsa Maju,KJ3,Serdang Raya Selatan,PY32,KJ3,PY32
+76,Taman Melati,KJ2,Masjid Jamek,AG7/KJ13/SP7,KJ2,SP7
+77,Kerinchi,KJ18,Taman Selatan,SA21,KJ18,SA21
+78,Klang Jaya,SA23,Hang Tuah,AG9/MR4/SP9,SA23,SP9
+79,Sri Rampai,KJ4,KLCC,KJ10,KJ4,KJ10
+80,Johan Setia,SA26,Bandar Tun Razak,SP14,SA26,SP14
+81,Abdullah Hukum,KJ17,Glenmarie 2,SA7,KJ17,SA7
+82,Cempaka,AG16,Sungai Jernih,KG33,AG16,KG33
+83,Jalan Meru,SA19,Bandar Tasik Selatan,SP15,SA19,SP15
+84,SS 18,KJ30,Damansara Damai,PY05,KJ30,PY05
+85,Taman Perindustrian Puchong,SP26,Muhibbah,SP20,SP26,SP20
+86,Dato' Menteri,SA12,Titiwangsa,AG3/MR11/PY17/SP3,SA12,SP3
+87,Phileo Damansara,KG12,Kinrara BK5,SP22,KG12,SP22
+88,Subang,SA6,Cochrane,KG21,SA6,KG21
+89,Putra Heights,KJ37/SP31,Subang Alam,KJ36,SP31,KJ36
+90,Surian,KG07,Universiti,KJ19,KG07,KJ19
+91,SS 15,KJ29,Bandar Utama,KG09/SA1,KJ29,SA1
+92,Bukit Jalil,SP17,Sentul Timur,AG1/SP1,SP17,SP1
+93,Taipan,KJ32,16 Sierra,PY38,KJ32,PY38
+94,Kwasa Sentral,KG05,Bandar Tun Razak,SP14,KG05,SP14
+95,Taman Equine,PY36,Taman Pertama,KG23,PY36,KG23
+96,Subang,SA6,Bandar Tasik Selatan,SP15,SA6,SP15
+97,Taman Mutiara,KG25,Stadium Kajang,KG34,KG25,KG34
+98,Titiwangsa,AG3/MR11/PY17/SP3,Taman Bahagia,KJ23,SP3,KJ23
+99,Pusat Bandar Puchong,SP25,Chan Sow Lin,AG11/PY24/SP11,SP25,SP11
+100,KL Sentral,KJ15/MR1,Gombak,KJ1,MR1,KJ1
