@@ -90,7 +90,7 @@ $("origin").innerHTML = sorted
   .map((s) => `<option value="${s.key}">${s.name} (${s.lines.map((c) => net.lines[c].name.replace(/ Line$/, "")).join(", ")})</option>`)
   .join("");
 $("origin").value = [...stations.values()].find((s) => s.name === "KL Sentral")?.key ?? sorted[0].key;
-for (const id of ["origin", "limit", "transfer", "wait", "near", "firstwait"]) $(id).addEventListener("input", update);
+for (const id of ["origin", "limit", "transfer", "wait", "near", "firstwait", "buffer", "bufferMin"]) $(id).addEventListener("input", update);
 for (const b of document.querySelectorAll(".presets button")) b.addEventListener("click", () => { $("limit").value = b.dataset.min; update(); });
 
 function fmt(sec) {
@@ -108,9 +108,12 @@ function update() {
     near: $("near").checked,
     firstWait: $("firstwait").checked,
   });
+  // Door-to-door allowance (walk in, ticket gates, walk out); not charged for the start station itself.
+  const buffer = $("buffer").checked ? Math.max(0, +$("bufferMin").value || 0) * 60 : 0;
   const rows = [];
   for (const st of stations.values()) {
-    const min = times.get(st.key) / 60;
+    const sec = times.get(st.key) + (st.key === origin ? 0 : buffer);
+    const min = sec / 60;
     const m = markers.get(st.key);
     const inside = min <= limit;
     const isOrigin = st.key === origin;
@@ -120,9 +123,9 @@ function update() {
       radius: isOrigin ? 10 : 6,
       color: isOrigin ? "#000" : "#fff",
     });
-    m.bindTooltip(`${st.name}: ${isOrigin ? "start" : Number.isFinite(min) ? fmt(times.get(st.key)) : "unreachable"}`);
+    m.bindTooltip(`${st.name}: ${isOrigin ? "start" : Number.isFinite(min) ? fmt(sec) : "unreachable"}`);
     if (isOrigin) m.bringToFront();
-    if (Number.isFinite(min)) rows.push({ st, sec: times.get(st.key), inside });
+    if (Number.isFinite(min)) rows.push({ st, sec, inside });
   }
   rows.sort((a, b) => a.sec - b.sec);
   const within = rows.filter((r) => r.inside && r.st.key !== origin).length;
