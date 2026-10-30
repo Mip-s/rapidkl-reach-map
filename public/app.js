@@ -77,7 +77,8 @@ const bases = {
   "Detailed (OpenStreetMap)": osm({}),
   "Blank": L.layerGroup(),
 };
-bases["Minimal"].addTo(map);
+// Offline at load: no tiles to fetch, so start on the blank basemap.
+(navigator.onLine ? bases["Minimal"] : bases["Blank"]).addTo(map);
 L.control.layers(bases, null, { position: "topright", collapsed: true }).addTo(map);
 map.attributionControl.addAttribution("Rail data: Prasarana via data.gov.my");
 
@@ -233,3 +234,5 @@ function update() {
   }
 }
 update();
+
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});

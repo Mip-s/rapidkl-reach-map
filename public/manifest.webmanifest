@@ -1,0 +1,14 @@
+{
+  "name": "RapidKL Reach Map",
+  "short_name": "KL Reach",
+  "description": "Minimum rail travel time from any RapidKL LRT, MRT or Monorail station.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f1318",
+  "theme_color": "#0f1318",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
