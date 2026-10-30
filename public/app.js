@@ -80,17 +80,72 @@ for (const l of Object.values(net.lines)) {
 const markers = new Map();
 for (const st of stations.values()) {
   const m = L.circleMarker([st.lat, st.lon], { radius: 6, weight: 2, color: "#fff", fillOpacity: 1 }).addTo(map);
-  m.on("click", () => { $("origin").value = st.key; update(); });
+  m.on("click", () => setOrigin(st.key));
   markers.set(st.key, m);
 }
 
 // Controls
 const sorted = [...stations.values()].sort((a, b) => a.name.localeCompare(b.name));
-$("origin").innerHTML = sorted
-  .map((s) => `<option value="${s.key}">${s.name} (${s.lines.map((c) => net.lines[c].name.replace(/ Line$/, "")).join(", ")})</option>`)
-  .join("");
+const lineNames = (s) => s.lines.map((c) => net.lines[c].name.replace(/ Line$/, "")).join(", ");
+const search = $("originSearch");
+const box = $("suggest");
+let matches = [];
+let active = -1;
+
+function setOrigin(key) {
+  $("origin").value = key;
+  search.value = stations.get(key).name;
+  closeSuggest();
+  update();
+}
+function closeSuggest() {
+  box.hidden = true;
+  search.setAttribute("aria-expanded", "false");
+  active = -1;
+}
+function renderSuggest() {
+  const q = search.value.trim().toLowerCase();
+  matches = sorted.filter((s) => !q || s.name.toLowerCase().includes(q) || s.stops.some((p) => p.id.toLowerCase() === q) || lineNames(s).toLowerCase().includes(q));
+  matches.sort((a, b) => !a.name.toLowerCase().startsWith(q) - !b.name.toLowerCase().startsWith(q) || a.name.localeCompare(b.name));
+  active = matches.length ? 0 : -1;
+  box.innerHTML = matches.length
+    ? matches.map((s, i) => `<li role="option" data-k="${s.key}" class="${i === active ? "on" : ""}">${s.lines.map((c) => `<span class="chip" style="background:${net.lines[c].color}"></span>`).join("")}${s.name}<small>${lineNames(s)}</small></li>`).join("")
+    : `<li>No station found</li>`;
+  box.hidden = false;
+  search.setAttribute("aria-expanded", "true");
+}
+search.addEventListener("focus", () => { search.select(); renderSuggest(); });
+search.addEventListener("click", () => { if (box.hidden) { search.select(); renderSuggest(); } });
+search.addEventListener("input", renderSuggest);
+search.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    if (box.hidden) renderSuggest();
+    if (!matches.length) return;
+    active = (active + (e.key === "ArrowDown" ? 1 : -1) + matches.length) % matches.length;
+    [...box.children].forEach((li, i) => li.classList.toggle("on", i === active));
+    box.children[active].scrollIntoView({ block: "nearest" });
+  } else if (e.key === "Enter" && active >= 0) {
+    e.preventDefault();
+    setOrigin(matches[active].key);
+    search.blur();
+  } else if (e.key === "Escape") {
+    e.preventDefault(); // a search input would otherwise clear itself
+    search.value = stations.get($("origin").value).name;
+    closeSuggest();
+  }
+});
+box.addEventListener("mousedown", (e) => {
+  const li = e.target.closest("li[data-k]");
+  if (li) { e.preventDefault(); setOrigin(li.dataset.k); search.blur(); }
+});
+search.addEventListener("blur", () => {
+  if ($("origin").value) search.value = stations.get($("origin").value).name;
+  closeSuggest();
+});
 $("origin").value = [...stations.values()].find((s) => s.name === "KL Sentral")?.key ?? sorted[0].key;
-for (const id of ["origin", "limit", "transfer", "wait", "near", "firstwait", "buffer", "bufferMin", "bufferPct"]) $(id).addEventListener("input", update);
+search.value = stations.get($("origin").value).name;
+for (const id of ["limit", "transfer", "wait", "near", "firstwait", "buffer", "bufferMin", "bufferPct"]) $(id).addEventListener("input", update);
 for (const b of document.querySelectorAll(".presets button")) b.addEventListener("click", () => { $("limit").value = b.dataset.min; update(); });
 
 function fmt(sec) {

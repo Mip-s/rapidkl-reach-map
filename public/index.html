@@ -13,7 +13,11 @@
   <p class="sub">Pick a station. See the minimum rail time to every other LRT, MRT and Monorail station.</p>
 
   <label for="origin">From station</label>
-  <select id="origin"></select>
+  <div class="combo">
+    <input id="originSearch" type="search" placeholder="Search a station, e.g. Masjid Jamek" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="suggest">
+    <input id="origin" type="hidden">
+    <ul id="suggest" role="listbox" hidden></ul>
+  </div>
 
   <label for="limit">Reach limit: <b id="limitText">60 min</b></label>
   <input id="limit" type="range" min="15" max="180" step="5" value="60">
