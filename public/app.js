@@ -70,12 +70,35 @@ const bandColor = (min) => {
 
 // Map
 const map = L.map("geo", { zoomControl: true }).setView([3.139, 101.6869], 11);
-L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  maxZoom: 19,
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | Rail data: Prasarana via data.gov.my',
-}).addTo(map);
-for (const l of Object.values(net.lines)) {
-  L.polyline(l.shape, { color: l.color, weight: 4, opacity: 0.65 }).addTo(map);
+const osmAttr = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+const osm = (opts) => L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: osmAttr, ...opts });
+const bases = {
+  "Minimal": osm({ className: "tiles-minimal" }),
+  "Detailed (OpenStreetMap)": osm({}),
+  "Blank": L.layerGroup(),
+};
+bases["Minimal"].addTo(map);
+L.control.layers(bases, null, { position: "topright", collapsed: true }).addTo(map);
+map.attributionControl.addAttribution("Rail data: Prasarana via data.gov.my");
+
+// Track segments between consecutive stations, so each can fade when out of reach.
+const segments = [];
+for (const [code, line] of Object.entries(net.lines)) {
+  const nearest = (s) => {
+    let best = 0, bd = Infinity;
+    line.shape.forEach(([la, lo], i) => {
+      const d = (la - s.lat) ** 2 + (lo - s.lon) ** 2;
+      if (d < bd) { bd = d; best = i; }
+    });
+    return best;
+  };
+  const onLine = net.stops.filter((s) => s.line === code).map((s) => ({ s, i: nearest(s) })).sort((x, y) => x.i - y.i);
+  for (let k = 0; k + 1 < onLine.length; k++) {
+    const A = onLine[k], B = onLine[k + 1];
+    const pts = [[A.s.lat, A.s.lon], ...line.shape.slice(A.i + 1, B.i), [B.s.lat, B.s.lon]];
+    const poly = L.polyline(pts, { color: line.color, weight: 5, opacity: 0.85 }).addTo(map);
+    segments.push({ poly, a: find(A.s.id), b: find(B.s.id), color: line.color });
+  }
 }
 const markers = new Map();
 for (const st of stations.values()) {
@@ -169,9 +192,11 @@ function update() {
   const fixed = on ? Math.max(0, +$("bufferMin").value || 0) * 60 : 0;
   const pct = on ? Math.max(0, +$("bufferPct").value || 0) / 100 : 0;
   const rows = [];
+  const secOf = new Map();
   for (const st of stations.values()) {
     const ride = times.get(st.key);
     const sec = st.key === origin ? 0 : ride + fixed + ride * pct;
+    secOf.set(st.key, sec);
     const min = sec / 60;
     const m = markers.get(st.key);
     const inside = min <= limit;
@@ -185,6 +210,10 @@ function update() {
     m.bindTooltip(`${st.name}: ${isOrigin ? "start" : Number.isFinite(min) ? fmt(sec) : "unreachable"}`);
     if (isOrigin) m.bringToFront();
     if (Number.isFinite(min)) rows.push({ st, sec, inside });
+  }
+  for (const sg of segments) {
+    const reach = secOf.get(sg.a) / 60 <= limit && secOf.get(sg.b) / 60 <= limit;
+    sg.poly.setStyle(reach ? { color: sg.color, weight: 5, opacity: 0.9 } : { color: sg.color, weight: 3, opacity: 0.12 });
   }
   rows.sort((a, b) => a.sec - b.sec);
   const within = rows.filter((r) => r.inside && r.st.key !== origin).length;

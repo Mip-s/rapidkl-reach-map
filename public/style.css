@@ -35,7 +35,7 @@ legend { font-weight:600; padding:0 4px; }
 #results .t { margin-left:auto; font-variant-numeric:tabular-nums; font-weight:600; }
 .chip { width:10px; height:10px; border-radius:2px; flex:none; }
 main { flex:1; position:relative; min-width:0; }
-#geo { position:absolute; inset:0; }
+#geo { position:absolute; inset:0; background:#f2f2f2; }
 @media (max-width:760px) {
   body { flex-direction:column-reverse; }
   #panel { width:100%; height:48%; border-right:0; border-top:1px solid var(--line); }
@@ -47,3 +47,4 @@ main { flex:1; position:relative; min-width:0; }
 #suggest li { padding:6px 8px; display:flex; gap:6px; align-items:center; cursor:pointer; }
 #suggest li.on, #suggest li:hover { background:var(--panel); }
 #suggest small { margin-left:auto; color:var(--muted); }
+.tiles-minimal { filter:grayscale(1) contrast(.55) brightness(1.25) opacity(.55); }
