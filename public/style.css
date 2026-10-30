@@ -65,3 +65,5 @@ main { flex:1; position:relative; min-width:0; }
 .guide table { width:100%; border-collapse:collapse; font-size:12px; margin:6px 0; }
 .guide th, .guide td { text-align:left; padding:3px 4px; border-bottom:1px solid var(--line); vertical-align:top; }
 .guide .fine { color:var(--muted); font-size:12px; }
+.locate { margin-top:8px; width:100%; }
+#locInfo { margin-top:6px; padding:8px; font-size:13px; background:var(--bg); border:1px solid var(--line); border-radius:6px; }

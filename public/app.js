@@ -258,6 +258,50 @@ function showRoute(sp, origin, destKey, { fixed, pct }) {
 }
 function fitRoute() { if (routeBounds) map.fitBounds(routeBounds, { padding: [40, 40], maxZoom: 14 }); }
 
+// Current location: pick the nearest station as the start.
+const distM = (lat1, lon1, lat2, lon2) => {
+  const r = 6371000, p1 = (lat1 * Math.PI) / 180, p2 = (lat2 * Math.PI) / 180;
+  const dp = p2 - p1, dl = ((lon2 - lon1) * Math.PI) / 180;
+  const x = Math.sin(dp / 2) ** 2 + Math.cos(p1) * Math.cos(p2) * Math.sin(dl / 2) ** 2;
+  return 2 * r * Math.asin(Math.sqrt(x));
+};
+let youLayer = null;
+function nearestStations(lat, lon, n = 3) {
+  return [...stations.values()]
+    .map((st) => ({ st, m: Math.min(...st.stops.map((s) => distM(lat, lon, s.lat, s.lon))) }))
+    .sort((a, b) => a.m - b.m)
+    .slice(0, n);
+}
+function locMessage(text) { $("locInfo").hidden = false; $("locInfo").textContent = text; }
+$("locate").addEventListener("click", () => {
+  if (!("geolocation" in navigator)) return locMessage("This browser cannot share your location.");
+  $("locate").disabled = true;
+  locMessage("Finding your location...");
+  navigator.geolocation.getCurrentPosition(
+    ({ coords }) => {
+      $("locate").disabled = false;
+      const { latitude: lat, longitude: lon, accuracy } = coords;
+      if (youLayer) youLayer.remove();
+      youLayer = L.layerGroup([
+        L.circle([lat, lon], { radius: accuracy, weight: 1, color: "#1a73e8", fillOpacity: 0.1 }),
+        L.circleMarker([lat, lon], { radius: 7, weight: 3, color: "#fff", fillColor: "#1a73e8", fillOpacity: 1 }).bindTooltip("You are here"),
+      ]).addTo(map);
+      const [first, ...others] = nearestStations(lat, lon);
+      const walkMin = (first.m * CIRCUITY) / WALK_MPS / 60;
+      const dist = first.m < 1000 ? `${Math.round(first.m / 10) * 10} m` : `${(first.m / 1000).toFixed(1)} km`;
+      originCombo.pick(first.st.key);
+      const far = first.m > 5000 ? " That is far, so a bus or ride to the station may be quicker." : "";
+      locMessage(`Nearest station: ${first.st.name}, ${dist} away (about ${dur(Math.max(1, walkMin))} walk).${far} Also close: ${others.map((o) => o.st.name).join(", ")}.`);
+      map.fitBounds(L.latLngBounds([[lat, lon], [first.st.lat, first.st.lon]]), { padding: [60, 60], maxZoom: 15 });
+    },
+    (err) => {
+      $("locate").disabled = false;
+      locMessage(err.code === 1 ? "Location is blocked. Allow location for this site in your browser settings, then try again." : "Could not get your location. Try again, or search for a station.");
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
+  );
+});
+
 function update() {
   markPreset();
   const limit = +$("limit").value;
