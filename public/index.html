@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RapidKL Reach Map</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<aside id="panel">
+  <h1>RapidKL Reach Map</h1>
+  <p class="sub">Pick a station. See the minimum rail time to every other LRT, MRT and Monorail station.</p>
+
+  <label for="origin">From station</label>
+  <select id="origin"></select>
+
+  <label for="limit">Reach limit: <b id="limitText">60 min</b></label>
+  <input id="limit" type="range" min="15" max="180" step="5" value="60">
+  <div class="presets"><button data-min="30">30</button><button data-min="60">1 h</button><button data-min="120">2 h</button></div>
+
+  <fieldset>
+    <legend>Assumptions</legend>
+    <label class="row">Interchange walk (min)
+      <input id="transfer" type="number" min="0" max="20" step="1" value="5"></label>
+    <label class="row chk"><input id="wait" type="checkbox" checked> Add wait at interchanges (half the line's average headway)</label>
+    <label class="row chk"><input id="near" type="checkbox" checked> Use nearby walking links (e.g. Merdeka – Plaza Rakyat)</label>
+    <label class="row chk"><input id="firstwait" type="checkbox"> Add wait at the first station</label>
+  </fieldset>
+
+  <div class="legend">
+    <span><i style="background:var(--b1)"></i>&le; 30</span>
+    <span><i style="background:var(--b2)"></i>&le; 60</span>
+    <span><i style="background:var(--b3)"></i>&le; 90</span>
+    <span><i style="background:var(--b4)"></i>&le; 120</span>
+    <span><i style="background:var(--b5)"></i>&gt; 120</span>
+    <span><i class="out"></i>over limit</span>
+  </div>
+
+  <div id="summary"></div>
+  <ol id="results"></ol>
+  <p class="note">Times come from the Prasarana GTFS weekday timetable. Interchange and walking times are estimates.</p>
+</aside>
+<main>
+  <div id="geo"></div>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
